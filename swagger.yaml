@@ -1,0 +1,196 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Auth API
+host: 127.0.0.1:5000
+basePath: /users/
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /checkUser:
+      get:
+        description: Check is user already exists
+        summary: Check is user already exists
+        operationId: GetOperation
+        parameters:
+        - name: username
+          in: query
+          description: username
+          type: string
+        responses:
+          "200":
+            description: Success
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  
+  /register:
+    post:
+      description: Register a new user
+      summary: Register a new user
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: The user to register.
+          schema:
+            type: object
+            required:
+              - username
+            properties:
+              first_name:
+                type: string
+              last_name:
+                type: string
+              username:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Registered
+          
+  /login:
+    post:
+      description: Login a user
+      summary: Login a user
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: User's data
+          schema:
+            type: object
+            required:
+              - username
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: log in
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+  /upload:
+    post:
+      description: Upload file to DB
+      summary: Upload file to DB
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: body
+          name: file
+          description: upload file
+          schema:
+            type: object
+            required:
+              - username
+            properties:
+              file:
+                type: object
+      responses:
+        "200":
+          description: upload file
+          schema:
+            type: object
+            properties:
+              info:
+                type: string  
+                
+  /updateData:
+    post:
+      description: Update file's data
+      summary: Update file's data
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: file
+          description: upload file
+          schema:
+            type: object
+            required:
+              - file_name
+            properties:
+              username:
+                type: string
+              file_name:
+                type: string
+                  
+      responses:
+        "200":
+          description: Data updated
+          schema:
+            type: object
+            properties:
+              info:
+                type: string  
+  /download:
+    post:
+      description: Download file from DB
+      summary: Download file from BD
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: file
+          description: download file
+          schema:
+            type: object
+            required:
+              - file_name
+            properties:
+              file_name:
+                type: string
+                  
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: object
+            properties:
+              info:
+                type: string  
+  /deleteFile:
+    post:
+      description: Delete file from DB
+      summary: Delete file from DB
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: file
+          description: delete file
+          schema:
+            type: object
+            required: 
+              - file_name
+            properties:
+              username:
+                type: string
+              file_name:
+                type: string
+                  
+      responses:
+        "200":
+          description: File deleted
+          schema:
+            type: object
+            properties:
+              info:
+                type: string
