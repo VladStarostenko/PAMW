@@ -8,10 +8,6 @@
     <div class="collapse navbar-collapse justify-content-md-center" id="navbar1">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <router-link class="nav-link" to="/">Home</router-link>
-        </li>
-
-        <li class="nav-item">
           <router-link class="nav-link" to="/login">Login</router-link>
         </li>
 

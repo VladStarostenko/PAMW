@@ -9,10 +9,6 @@
       <div class="collapse navbar-collapse justify-content-md-center" id="navbar1">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <router-link class="nav-link" to="/">Home</router-link>
-          </li>
-
-          <li class="nav-item">
             <router-link class="nav-link" to="/profile">Profile</router-link>
           </li>
 
@@ -45,19 +41,30 @@
                       <td>Username</td>
                       <td>{{username}}</td>
                     </tr>
-                    <tr>
-                      <td>File</td>
-                      <td>{{filename}}</td>
-                    </tr>
-                    <v-btn
-                      @click="downloadWithAxios"
-                      color="blue"
-                    >Download document</v-btn>
-                    <v-btn
-                      @click="deleteFile"
-                      color="red"
-                    >Delete document</v-btn>
                 </tbody>
+            </table>
+            <div class="col-sm-8 mx-auto">
+              <h1 class="text-center">MY FILE</h1>
+            </div>
+            <table class="table col-md-6 mx-auto">
+              <tbody>
+              <tr>
+                <td>My file</td>
+                <td>{{filename}}</td>
+                <v-btn
+                  @click="downloadWithAxios"
+                  color="success"
+                  :disable="!(filename !== '') "
+                >Download</v-btn>
+                <v-btn
+                  @click="deleteFile"
+                  icon
+                  style="margin-left: 2em"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </tr>
+              </tbody>
             </table>
             <v-form v-model="valid" :lazy-validation="lazy" action="" method=post enctype=multipart/form-data id="formElem">
                 <v-file-input
@@ -80,8 +87,12 @@
                 <v-btn
                   @click="uploadFile"
                   :disabled="!valid"
-                  color="success"
-                >Add document</v-btn>
+                  color="blue-grey"
+                  class="ma-2 white--text"
+                >
+                  Upload
+                  <v-icon right dark>mdi-cloud-upload</v-icon>
+                </v-btn>
             </v-form>
         </div>
     </div>
@@ -156,6 +167,7 @@ export default {
       axios.get('users/download', {params: {file_name: this.filename}, responseType: 'blob'})
         .then(response => {
           this.forceFileDownload(response)
+          this.updateDate()
         })
         .catch(() => console.log('error occured'))
     },

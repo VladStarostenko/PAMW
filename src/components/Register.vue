@@ -160,7 +160,7 @@ export default {
       }
       this.$store.dispatch('register', user)
         .then(res => {
-          router.push({name: 'Login'})
+          router.push({name: '/'})
         }).catch(err => {
           console.log(err)
         })
