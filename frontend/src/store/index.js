@@ -23,7 +23,7 @@ export default new Vuex.Store({
   },
   actions: {
     async register ({commit}, {firstname, lastname, username, email, password, fileName}) { // Rejestracja
-      axios.post('users/register', {
+      axios.post('https://vuejs-flask-api.herokuapp.com/users/register', {
         first_name: firstname,
         last_name: lastname,
         username: username,

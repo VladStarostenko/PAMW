@@ -1,15 +1,15 @@
-# base image
-FROM python:3.7.2
+FROM python:3.8
 
-# set working directory
-WORKDIR /usr/src/app
+WORKDIR /code
 
-# add and install requirements
-COPY ./requirements.txt /usr/src/app/requirements.txt
+ENV FLASK_APP mongo.py
+
+ENV FLASK_RUN_HOST 0.0.0.0
+
+COPY requirements.txt requirements.txt
+
 RUN pip install -r requirements.txt
 
-# add app
-COPY . /usr/src/app
+COPY . .
 
-# run server
-CMD ["python", "/usr/src/app/mongo.py"]
+CMD ["flask", "run"]

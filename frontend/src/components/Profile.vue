@@ -1,23 +1,14 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <div>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark rounded">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar1" aria-controls="navbar1"
-              aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse justify-content-md-center" id="navbar1">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/profile">Profile</router-link>
-          </li>
-
-          <li class="nav-item">
-            <a href="" class="nav-link" v-on:click="logout">Logout</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
+    <b-navbar toggleable="lg" type="dark" variant="dark">
+      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <b-collapse id="nav-collapse" is-nav class="justify-content-md-center">
+        <b-navbar-nav>
+          <router-link class="nav-link" to="/profile">Profile</router-link>
+          <a href="/" class="nav-link" v-on:click="logout">Logout</a>
+        </b-navbar-nav>
+      </b-collapse>
+    </b-navbar>
     <div class="container">
         <div class="jumbotron mt-5">
             <div class="col-sm-8 mx-auto">
@@ -46,26 +37,27 @@
             <div class="col-sm-8 mx-auto">
               <h1 class="text-center">MY FILE</h1>
             </div>
-            <table class="table col-md-6 mx-auto">
+          <table v-for="(filein, i) in filename" :key="i" class="table col-md-6 mx-auto">
+            <template>
               <tbody>
-              <tr>
-                <td>My file</td>
-                <td>{{filename}}</td>
-                <v-btn
-                  @click="downloadWithAxios"
-                  color="success"
-                  :disable="!(filename !== '') "
-                >Download</v-btn>
-                <v-btn
-                  @click="deleteFile"
-                  icon
-                  style="margin-left: 2em"
-                >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </tr>
+                <tr>
+                  <td>My file</td>
+                  <td>{{filein}}</td>
+                  <v-btn
+                    @click="downloadWithAxios(filename[i])"
+                    color="success"
+                  >Download</v-btn>
+                  <v-btn
+                    @click="deleteFile(filein)"
+                    icon
+                    style="margin-left: 2em"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </tr>
               </tbody>
-            </table>
+            </template>
+          </table>
             <v-form v-model="valid" :lazy-validation="lazy" action="" method=post enctype=multipart/form-data id="formElem">
                 <v-file-input
                   :rules="[v => !!v || 'Password is required']"
@@ -85,7 +77,7 @@
                   </template>
                 </v-file-input>
                 <v-btn
-                  @click="uploadFile"
+                  @click="uploadFiles"
                   :disabled="!valid"
                   color="blue-grey"
                   class="ma-2 white--text"
@@ -120,17 +112,34 @@ export default {
   },
   mounted: function () {
     console.log(localStorage.getItem('usertoken'))
+    this.getFileNames()
   },
   methods: {
     logout () {
       localStorage.removeItem('usertoken')
     },
-    uploadFile () {
-      console.log(this.file[0])
-      this.filename = this.file[0].name
+    fun () {
+      console.log(this.filename)
+    },
+    getFileNames () {
+      axios.get('https://vuejs-flask-api.herokuapp.com/users/getFileNames', {params: {username: this.username}})
+        .then(res => {
+          this.filename = res.data.file_name
+        })
+        .catch(err =>
+          console.log(err))
+    },
+    uploadFiles () {
+      for (let i = 0; i < this.file.length; i++) {
+        this.uploadFile(this.file[i])
+      }
+    },
+    uploadFile (file) {
+      console.log(file)
       let formData = new FormData()
-      formData.append('file', this.file[0])
-      axios.post('users/upload',
+      formData.append('file', file)
+      formData.append('username', this.username)
+      axios.post('https://vuejs-flask-api.herokuapp.com/users/upload',
         formData,
         {
           headers: {
@@ -139,43 +148,45 @@ export default {
         }
       ).then(res => {
         console.log(res)
-        this.updateDate()
+        this.updateDate(file)
       }).catch(err => {
         console.log(err)
       })
     },
-    updateDate () {
-      axios.post('users/updateDate', {
-        file_name: this.filename,
+    updateDate (file) {
+      axios.post('https://vuejs-flask-api.herokuapp.com/users/updateDate', {
+        file_name: file.name,
         username: this.username
       }).then(res => {
         console.log(res)
+        this.filename = res.data.file_name
+        console.log(this.filename)
       }).catch(err => {
         console.log(err)
       })
     },
     forceFileDownload (response) {
-      console.log(response)
+      console.log(response.config)
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', this.filename)
+      link.setAttribute('download', response.config.params.file_name)
       // document.body.appendChild(link)
       link.click()
     },
-    downloadWithAxios () {
-      axios.get('users/download', {params: {file_name: this.filename}, responseType: 'blob'})
+    downloadWithAxios (filein) {
+      console.log(filein)
+      axios.get('https://vuejs-flask-api.herokuapp.com/users/download', {params: {file_name: filein, username: this.username}, responseType: 'blob'})
         .then(response => {
           this.forceFileDownload(response)
-          this.updateDate()
         })
         .catch(() => console.log('error occured'))
     },
-    deleteFile () {
-      axios.delete('users/deleteFile', {params: {file_name: this.filename, username: this.username}})
-        .then(response => {
-          this.filename = ''
-          console.log(response)
+    deleteFile (filein) {
+      axios.delete('https://vuejs-flask-api.herokuapp.com/users/deleteFile', {params: {username: this.username, file_name: filein}})
+        .then(res => {
+          this.filename = res.data.file_name
+          console.log(res)
         })
         .catch(err => {
           console.log(err)

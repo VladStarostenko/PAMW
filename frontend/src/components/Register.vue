@@ -35,7 +35,6 @@
 
                 <v-text-field
                   v-model="username"
-                  @blur = "this.checkUser"
                   :rules="[this.statUs || 'Login already exists', v => !!v || 'Login name is required', v => (v && v.length <= 10) || 'First name must be less than 10 characters', v => /^[A-z]/.test(v) || 'First name must consist of letters']"
                   label="Login"
                   required
@@ -88,7 +87,7 @@ import Navbar from '../components/Navbar'
 export default {
   data () {
     return {
-      file_name: '',
+      file_name: [],
       first_name: '',
       last_name: '',
       username: '',
@@ -124,13 +123,16 @@ export default {
     }
   },
   beforeUpdate: async function checkUser () {
-    const result = axios.get('users/checkUser', {params: {username: this.username}})
+    const result = axios.get('https://vuejs-flask-api.herokuapp.com/users/checkUser', {params: {username: this.username}})
     var result1 = await result
     if (result1.data === 'Free') {
       this.statUs = true
     } else {
       this.statUs = false
     }
+  },
+  mounted: function () {
+    localStorage.removeItem('usertoken')
   },
   components: {
     'Navbar': Navbar
@@ -140,7 +142,7 @@ export default {
       this.$refs.form.reset()
     },
     checkUser () {
-      axios.get('users/checkUser', {params: {username: this.username}})
+      axios.get('https://vuejs-flask-api.herokuapp.com/users/checkUser', {params: {username: this.username}})
         .then(res => {
           if (res.data === 'Free') {
             this.statUs = true
@@ -160,7 +162,7 @@ export default {
       }
       this.$store.dispatch('register', user)
         .then(res => {
-          router.push({name: '/'})
+          router.push('/')
         }).catch(err => {
           console.log(err)
         })

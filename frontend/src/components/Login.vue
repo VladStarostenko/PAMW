@@ -72,18 +72,26 @@ export default {
   components: {
     'Navbar': Navbar
   },
+  mounted: function () {
+    localStorage.removeItem('usertoken')
+  },
   methods: {
     reset () {
       this.$refs.form.reset()
     },
     login () {
-      axios.post('http://127.0.0.1:5000/users/login', {
+      axios.post('https://vuejs-flask-api.herokuapp.com/users/login', {
         username: this.username,
         password: this.password
       }).then(res => {
-        localStorage.setItem('usertoken', res.data.token)
-        this.$store.commit('auth_success')
-        this.$router.push('/profile').catch(err => { console.log(err) })
+        if (res.data.token !== undefined) {
+          localStorage.setItem('usertoken', res.data.token)
+          this.$store.commit('auth_success')
+          this.$router.push('/profile').catch(err => { console.log(err) })
+        } else {
+          alert('Invalid username and password')
+          this.reset()
+        }
       }).catch(err => {
         console.log(err)
       })
