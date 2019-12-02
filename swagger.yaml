@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   version: "1.0.0"
   title: Auth API
-host: 127.0.0.1:5000
+host: vuejs-flask-api.herokuapp.com
 basePath: /users/
 schemes:
   - http
@@ -11,6 +11,72 @@ consumes:
 produces:
   - application/json
 paths:
+  /register:
+      post:
+        description: Registration the new user
+        summary: Registration the new user
+        consumes:
+          - application/json
+        parameters:
+          - in: body
+            name: user
+            description: User's registration data.
+            schema:
+              type: object
+              required:
+                - username
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                file_name:
+                  type: array
+                  items:
+                    type: string
+        responses:
+          "200":
+            description: Registered
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+          
+  /login:
+    post:
+      description: Login the user
+      summary: Login the user
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: User's data
+          schema:
+            type: object
+            required:
+              - username
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Logged in
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                
   /checkUser:
       get:
         description: Check is user already exists
@@ -30,72 +96,16 @@ paths:
                 status:
                   type: string
                   
-  /register:
-    post:
-      description: Register a new user
-      summary: Register a new user
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: user
-          description: The user to register.
-          schema:
-            type: object
-            required:
-              - username
-            properties:
-              first_name:
-                type: string
-              last_name:
-                type: string
-              username:
-                type: string
-              email:
-                type: string
-              password:
-                type: string
-      responses:
-        "200":
-          description: Registered
-          
-  /login:
-    post:
-      description: Login a user
-      summary: Login a user
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: user
-          description: User's data
-          schema:
-            type: object
-            required:
-              - username
-            properties:
-              username:
-                type: string
-              password:
-                type: string
-      responses:
-        "200":
-          description: log in
-          schema:
-            type: object
-            properties:
-              token:
-                type: string
   /upload:
     post:
-      description: Upload file to DB
-      summary: Upload file to DB
+      description: Upload files to DB
+      summary: Upload files to DB
       consumes:
         - multipart/form-data
       parameters:
         - in: body
-          name: file
-          description: upload file
+          name: File
+          description: File
           schema:
             type: object
             required:
@@ -103,45 +113,19 @@ paths:
             properties:
               file:
                 type: object
-      responses:
-        "200":
-          description: upload file
-          schema:
-            type: object
-            properties:
-              info:
-                type: string  
-                
-  /updateData:
-    post:
-      description: Update file's data
-      summary: Update file's data
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: file
-          description: upload file
-          schema:
-            type: object
-            required:
-              - file_name
-            properties:
               username:
                 type: string
-              file_name:
-                type: string
-                  
       responses:
         "200":
-          description: Data updated
+          description: upload file
           schema:
             type: object
             properties:
-              info:
+              status:
                 type: string  
+                
   /download:
-    post:
+    get:
       description: Download file from DB
       summary: Download file from BD
       consumes:
@@ -157,6 +141,8 @@ paths:
             properties:
               file_name:
                 type: string
+              username:
+                type: string
                   
       responses:
         "200":
@@ -164,10 +150,41 @@ paths:
           schema:
             type: object
             properties:
-              info:
-                type: string  
-  /deleteFile:
+              file:
+                type: object  
+        
+  /updateData:
     post:
+      description: Update user;s data
+      summary: Update user's data
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: file
+          description: U  ploaded file
+          schema:
+            type: object
+            required:
+              - file_name
+            properties:
+              username:
+                type: string
+              file_name:
+                type: string
+                  
+      responses:
+        "200":
+          description: Updated array of file names
+          schema:
+            type: object
+            properties:
+              file_name:
+                type: array  
+                items:
+                  type: string
+  /deleteFile:
+    delete:
       description: Delete file from DB
       summary: Delete file from DB
       consumes:
@@ -175,7 +192,7 @@ paths:
       parameters:
         - in: body
           name: file
-          description: delete file
+          description: File whith will be delete
           schema:
             type: object
             required: 
@@ -192,5 +209,26 @@ paths:
           schema:
             type: object
             properties:
-              info:
-                type: string
+              file_name:
+                type: array
+                items:
+                  type: string
+  /getFileName:
+    get:
+      description: Return all user's files
+      summary: Return all user's files
+      parameters:
+      - name: username
+        in: query
+        description: username
+        type: string
+      responses:
+        "200":
+          description: All user's files
+          schema:
+            type: object
+            properties:
+              file_name:
+                type: array
+                items:
+                  type: string

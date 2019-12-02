@@ -11,7 +11,6 @@ from pymongo import MongoClient
 
 
 app = Flask(__name__)
-# app.config["MONGO_URI"] = "mongodb://heroku_fmk9tc2b:4epl8h7m0iiltrpaogkksvpj0g@ds033079.mlab.com:33079/heroku_fmk9tc2b?retryWrites=false"
 app.config['MONGO_DBNAME'] = 'vueloginreg'
 app.config['MONGO_URI'] = 'mongodb://mongodb:27017/vueloginreg'
 
@@ -26,87 +25,6 @@ DB = mongo.db
 GRID_FS = GridFS(DB)
 
 CORS(app)
-
-@app.route('/users/upload', methods=['GET','POST'])
-def uploadFile():
-    with GRID_FS.new_file(filename=request.files['file'].filename, username=request.form['username']) as fp:
-        fp.write(request.files['file'])
-        file_id = fp._id
-    if GRID_FS.find_one(file_id) is not None:
-        return 'Image Upload Successfully'
-    else:
-        response.status = 500
-        return 'Error occurred while saving file.'
-
-@app.route('/users/download', methods=['GET', 'POST'])
-def index():
-    grid_fs_file = GRID_FS.find_one({'filename': request.args.get('file_name'), 'username': request.args.get('username') })
-    response = make_response(grid_fs_file.read())
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers["Content-Disposition"] = "attachment; filename={}".format(request.args.get('file_name'))
-    return response
-
-@app.route('/users/updateDate', methods=['POST'])
-def updateDate():
-    users = mongo.db.users
-    username = request.get_json()['username']
-    response = users.find_one({'username': username})
-    file_names = response['file_name']
-    file_names.append(request.get_json()['file_name'])
-    users.find_one_and_update(
-        {"username" : username},
-        {"$set": {"file_name":file_names}},
-        upsert = True
-    )
-    return jsonify({"file_name": file_names})
-    # mongo.db.users.find_one_and_update(
-    #     {"username" : request.get_json()['username']},
-    #     {"$set": {"file_name": request.get_json()['file_name']}},
-    #     upsert = True
-    # )
-    # return 'add'
-    # # update({"_id" :ObjectId("4e93037bbf6f1dd3a0a9541a") },{$set : {"new_field":1}})
-
-@app.route('/users/checkUser', methods=['GET'])
-def checkUser():
-    users = mongo.db.users
-    username = request.args.get('username')
-    response = users.find_one({'username': username})
-    if response:
-        return "Exists"
-    return "Free"
-
-@app.route('/users/deleteFile', methods=['DELETE'])
-def delFile():
-    users = mongo.db.users
-
-    username = request.args.get('username')
-    file_name = request.args.get('file_name')
-
-    response = users.find_one({'username': username})
-    file_names = response['file_name']
-    file_index = file_names.index(file_name)
-    file_names.pop(file_index)
-
-    print(file_name)
-    grid_fs_file = GRID_FS.find_one({'filename': file_name, 'username': username})
-    print(grid_fs_file)
-    GRID_FS.delete(file_id=grid_fs_file._id, session=None)
-
-    users.find_one_and_update(
-        {"username" : username},
-        {"$set": {"file_name":file_names }},
-        upsert = True
-    )
-    return jsonify({"file_name": file_names})
-
-
-    # mongo.db.users.find_one_and_update(
-    #     {"username" : request.args.get('username')},
-    #     {"$set": {"file_name": ' '}},
-    #     upsert = True
-    # )
-    # return 'delete'
 
 @app.route('/users/register', methods=['POST'])
 def register():
@@ -125,7 +43,7 @@ def register():
         'username': username,
         'email': email,
         'password': password,
-        'file_name': file_name,
+            'file_name': file_name,
         'created': created
     })
 
@@ -160,6 +78,72 @@ def login():
         result = jsonify({"result": "No results found"})
     return result
 
+@app.route('/users/checkUser', methods=['GET'])
+def checkUser():
+    users = mongo.db.users
+    username = request.args.get('username')
+    response = users.find_one({'username': username})
+    if response:
+        return "Exists"
+    return "Free"
+
+@app.route('/users/upload', methods=['GET','POST'])
+def uploadFile():
+    with GRID_FS.new_file(filename=request.files['file'].filename, username=request.form['username']) as fp:
+        fp.write(request.files['file'])
+        file_id = fp._id
+    if GRID_FS.find_one(file_id) is not None:
+        return 'Image Upload Successfully'
+    else:
+        response.status = 500
+        return 'Error occurred while saving file.'
+
+@app.route('/users/download', methods=['GET', 'POST'])
+def index():
+    grid_fs_file = GRID_FS.find_one({'filename': request.args.get('file_name'), 'username': request.args.get('username') })
+    response = make_response(grid_fs_file.read())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers["Content-Disposition"] = "attachment; filename={}".format(request.args.get('file_name'))
+    return response
+
+@app.route('/users/updateData', methods=['POST'])
+def updateData():
+    users = mongo.db.users
+    username = request.get_json()['username']
+    response = users.find_one({'username': username})
+    file_names = response['file_name']
+    file_names.append(request.get_json()['file_name'])
+    users.find_one_and_update(
+        {"username" : username},
+        {"$set": {"file_name":file_names}},
+        upsert = True
+    )
+    return jsonify({"file_name": file_names})
+
+@app.route('/users/deleteFile', methods=['DELETE'])
+def delFile():
+    users = mongo.db.users
+
+    username = request.args.get('username')
+    file_name = request.args.get('file_name')
+
+    response = users.find_one({'username': username})
+    file_names = response['file_name']
+    file_index = file_names.index(file_name)
+    file_names.pop(file_index)
+
+    print(file_name)
+    grid_fs_file = GRID_FS.find_one({'filename': file_name, 'username': username})
+    print(grid_fs_file)
+    GRID_FS.delete(file_id=grid_fs_file._id, session=None)
+
+    users.find_one_and_update(
+        {"username" : username},
+        {"$set": {"file_name":file_names }},
+        upsert = True
+    )
+    return jsonify({"file_name": file_names})
+
 @app.route('/users/getFileNames', methods=['GET'])
 def getFileNames():
     users = mongo.db.users
@@ -169,6 +153,3 @@ def getFileNames():
     file_name = response['file_name']
 
     return jsonify({"file_name": file_name})
-
-# if __name__ == '__main__':
-#     app.run(debug=True)

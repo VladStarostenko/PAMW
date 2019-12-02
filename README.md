@@ -5,10 +5,6 @@ Run aplication:
 	docker-compose build
 	docker-compose up
 
-Or: 
-	cd /backend
-	python3 mongo.py
+Heroku: 
 
-	cd /frontend
-	npm install
-	npm start
+	https://vuejs-flask.herokuapp.com/

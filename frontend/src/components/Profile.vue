@@ -142,13 +142,13 @@ export default {
           }
         }
       ).then(res => {
-        this.updateDate(file)
+        this.updateData(file)
       }).catch(err => {
         console.log(err)
       })
     },
-    updateDate (file) {
-      axios.post('https://vuejs-flask-api.herokuapp.com/users/updateDate', {
+    updateData (file) {
+      axios.post('https://vuejs-flask-api.herokuapp.com/users/updateData', {
         file_name: file.name,
         username: this.username
       }).then(res => {
