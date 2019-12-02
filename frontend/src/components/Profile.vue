@@ -111,15 +111,11 @@ export default {
     }
   },
   mounted: function () {
-    console.log(localStorage.getItem('usertoken'))
     this.getFileNames()
   },
   methods: {
     logout () {
       localStorage.removeItem('usertoken')
-    },
-    fun () {
-      console.log(this.filename)
     },
     getFileNames () {
       axios.get('https://vuejs-flask-api.herokuapp.com/users/getFileNames', {params: {username: this.username}})
@@ -135,7 +131,6 @@ export default {
       }
     },
     uploadFile (file) {
-      console.log(file)
       let formData = new FormData()
       formData.append('file', file)
       formData.append('username', this.username)
@@ -147,7 +142,6 @@ export default {
           }
         }
       ).then(res => {
-        console.log(res)
         this.updateDate(file)
       }).catch(err => {
         console.log(err)
@@ -158,24 +152,19 @@ export default {
         file_name: file.name,
         username: this.username
       }).then(res => {
-        console.log(res)
         this.filename = res.data.file_name
-        console.log(this.filename)
       }).catch(err => {
         console.log(err)
       })
     },
     forceFileDownload (response) {
-      console.log(response.config)
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', response.config.params.file_name)
-      // document.body.appendChild(link)
       link.click()
     },
     downloadWithAxios (filein) {
-      console.log(filein)
       axios.get('https://vuejs-flask-api.herokuapp.com/users/download', {params: {file_name: filein, username: this.username}, responseType: 'blob'})
         .then(response => {
           this.forceFileDownload(response)
@@ -186,7 +175,6 @@ export default {
       axios.delete('https://vuejs-flask-api.herokuapp.com/users/deleteFile', {params: {username: this.username, file_name: filein}})
         .then(res => {
           this.filename = res.data.file_name
-          console.log(res)
         })
         .catch(err => {
           console.log(err)

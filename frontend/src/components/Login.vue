@@ -86,7 +86,6 @@ export default {
       }).then(res => {
         if (res.data.token !== undefined) {
           localStorage.setItem('usertoken', res.data.token)
-          this.$store.commit('auth_success')
           this.$router.push('/profile').catch(err => { console.log(err) })
         } else {
           alert('Invalid username and password')

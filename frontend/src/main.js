@@ -13,7 +13,6 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 const vuetifyOptions = { }
 Vue.use(Vuetify)
 Vue.use(BootstrapVue)
-// require('../node_modules/bootstrap/dist/css/bootstrap.css')
 
 Vue.config.productionTip = false
 
